@@ -47,4 +47,51 @@ class MovieInfoRepositoryIntegrationTest {
                 .expectNextCount(3)
                 .verifyComplete();
     }
+
+    @Test
+    void findById(){
+        var movieMono = movieInfoRepository.findById("abc");
+        StepVerifier.create(movieMono)
+                .assertNext(movieInfo -> {
+                    assertEquals("Dark Knight Rises", movieInfo.getName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void saveMovieInfo(){
+        var movieInfo = new MovieInfo(null, "Big Short",
+                        2009, List.of("Christian Bale", "Steve Carell"), LocalDate.parse("2009-06-15"));
+
+        var moviesInfoMono = movieInfoRepository.save(movieInfo);
+        StepVerifier.create(moviesInfoMono)
+                .assertNext(movie -> {
+                    assertEquals("Big Short", movie.getName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void updateMovieInfo(){
+        var movieInfo = movieInfoRepository.findById("abc").block();
+        movieInfo.setYear(2023);
+
+        var moviesInfoMono = movieInfoRepository.save(movieInfo);
+
+        StepVerifier.create(moviesInfoMono)
+                .assertNext(movie -> {
+                    assertEquals(2023, movie.getYear());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteMovie() {
+        movieInfoRepository.deleteById("abc").block();
+        var moviesInfoFlux = movieInfoRepository.findAll();
+
+        StepVerifier.create(moviesInfoFlux)
+                .expectNextCount(2)
+                .verifyComplete();
+    }
 }
