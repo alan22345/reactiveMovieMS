@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -136,4 +137,63 @@ class MoviesInfoControllerIntgTest {
                 .expectBodyList(MovieInfo.class)
                 .hasSize(2);
     }
+
+    @Test
+    void updateMovieInfoNotFound() {
+        var movieId = "def";
+        var movie = new MovieInfo(null, "Big Short",
+                2009, List.of("Christian Bale", "Steve Carell"), LocalDate.parse("2009-06-15"));
+
+        webTestClient
+                .post()
+                .uri(MOVIES_INFO_URL + "{id}", movieId)
+                .bodyValue(movie)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
+    void getMovieInfoByIdNotFound(){
+        var movieInfoId = "123";
+        webTestClient
+                .get()
+                .uri(MOVIE_BY_ID + "{id}", movieInfoId)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
+    void getMovieInfoByYear(){
+        var movieYear = 2005;
+        var uri = UriComponentsBuilder.fromUriString(MOVIES_INFO_URL)
+                            .queryParam("year", movieYear)
+                            .buildAndExpand().toUri();
+        webTestClient
+                .get()
+                .uri(uri)
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBodyList(MovieInfo.class)
+                .hasSize(1);
+    }
+    @Test
+    void getMovieInfoByName(){
+        var movieName = "Batman Begins";
+        var uri = UriComponentsBuilder.fromUriString(MOVIES_INFO_URL)
+                .queryParam("name", movieName)
+                .buildAndExpand().toUri();
+
+        webTestClient
+                .get()
+                .uri(uri)
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBodyList(MovieInfo.class)
+                .hasSize(1);
+    }
+
 }

@@ -94,4 +94,26 @@ class MovieInfoRepositoryIntegrationTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+
+
+    @Test
+    void findMovieByYear(){
+        var moviesInfoFlux = movieInfoRepository.findByYear(2005);
+
+        StepVerifier.create(moviesInfoFlux)
+                .assertNext(movieInfo -> {
+                    assertEquals("Batman Begins", movieInfo.getName());
+                })
+                .verifyComplete();
+
+    }
+
+    @Test
+    void findMovieByName(){
+        var moviesInfoFlux = movieInfoRepository.findByName("Batman Begins");
+        StepVerifier.create(moviesInfoFlux)
+                .assertNext(movieInfo -> {
+                    assertEquals("Batman Begins", movieInfo.getName());
+                }).verifyComplete();
+    }
 }

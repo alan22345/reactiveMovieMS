@@ -3,6 +3,7 @@ package com.reactivespring.controller;
 import com.reactivespring.domain.MovieInfo;
 import com.reactivespring.service.MoviesInfoService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,13 +20,21 @@ public class MoviesInfoController {
         this.moviesInfoService = moviesInfoService;
     }
     @GetMapping("/moviesinfo")
-    public Flux<MovieInfo> getAllMovieInfo(){
+    public Flux<MovieInfo> getAllMovieInfo(@RequestParam(value = "year", required = false) Integer year,
+                                           @RequestParam(value = "name", required = false) String name){
+        if(year != null){
+            return moviesInfoService.getMovieByYear(year);
+        } else if (name != null) {
+            return moviesInfoService.getMovieByName(name);
+        }
         return moviesInfoService.getAllMovieInfos();
     }
 
     @GetMapping("movie/{id}")
-    public Mono<MovieInfo> getMovieById(@PathVariable String id){
-        return moviesInfoService.getMovieInfoById(id);
+    public Mono<ResponseEntity<MovieInfo>> getMovieById(@PathVariable String id){
+        return moviesInfoService.getMovieInfoById(id)
+                .map(ResponseEntity.ok()::body)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
     @PostMapping("/moviesinfo")
@@ -35,8 +44,10 @@ public class MoviesInfoController {
     }
 
     @PostMapping("moviesinfo/{id}")
-    public Mono<MovieInfo> updateMovieInfo(@RequestBody MovieInfo updatedMovieInfo, @PathVariable String id){
-        return moviesInfoService.updateMovieInfo(updatedMovieInfo, id);
+    public Mono<ResponseEntity<MovieInfo>> updateMovieInfo(@RequestBody MovieInfo updatedMovieInfo, @PathVariable String id){
+        return moviesInfoService.updateMovieInfo(updatedMovieInfo, id)
+                .map(ResponseEntity.ok()::body)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
     @DeleteMapping("/moviesinfo/{id}")
