@@ -115,5 +115,25 @@ public class ReviewsUnitTest {
                 .expectStatus().isNoContent();
     }
 
+    @Test
+    void addReview_validation(){
+        var review = new Review(null, null, "Great movie", -9.0);
 
+        when(reviewReactorRepository.save(isA(Review.class)))
+                .thenReturn(Mono.just(review));
+
+        webTestClient
+                .post()
+                .uri(REVIEWS_URL)
+                .bodyValue(review)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(Review.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    var savedReview = movieInfoEntityExchangeResult.getResponseBody();
+                    assert savedReview != null;
+                    assert savedReview.getReviewId() != null;
+                });
+    }
 }
