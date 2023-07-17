@@ -6,3 +6,6 @@ restClient:
   movieReviewsUrl: http://localhost:8081/v1/reviews
 server:
   port: 8082
+wiremock:
+  server:
+    httpsPort: -1
