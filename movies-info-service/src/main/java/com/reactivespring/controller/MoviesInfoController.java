@@ -30,7 +30,7 @@ public class MoviesInfoController {
         return moviesInfoService.getAllMovieInfos();
     }
 
-    @GetMapping("movie/{id}")
+    @GetMapping("moviesinfo/{id}")
     public Mono<ResponseEntity<MovieInfo>> getMovieById(@PathVariable String id){
         return moviesInfoService.getMovieInfoById(id)
                 .map(ResponseEntity.ok()::body)

@@ -61,7 +61,7 @@ class MoviesInfoControllerTest {
 
         webTestClient
                 .get()
-                .uri("/v1/movie/123")
+                .uri("/v1/moviesinfo/123")
                 .exchange()
                 .expectStatus()
                 .is2xxSuccessful()
