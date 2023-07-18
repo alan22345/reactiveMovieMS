@@ -84,6 +84,8 @@ public class MoviesControllerIntgTest {
                 .is4xxClientError()
                 .expectBody(String.class)
                 .isEqualTo("There is no MovieInfo available for the ID : 1");
+
+        WireMock.verify(1, getRequestedFor(urlEqualTo("/v1/moviesinfo" + "/" + movieId)));
     }
 
     @Test
@@ -135,5 +137,32 @@ public class MoviesControllerIntgTest {
                 .is5xxServerError()
                 .expectBody(String.class)
                 .isEqualTo("Server exception in MoviesInfoServicemovieInfo Service Unavailable");
+
+        WireMock.verify(4, getRequestedFor(urlEqualTo("/v1/moviesinfo" + "/" + movieId)));
+    }
+
+    @Test
+    void retrieveMovieReview500() {
+        var movieId = "1";
+        stubFor(get(urlEqualTo("/v1/moviesinfo" + "/" + movieId))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("movieinfo.json")));
+
+        stubFor(get(urlPathEqualTo("/v1/reviews"))
+                .withQueryParam("movieInfoId", equalTo(movieId))
+                .willReturn(aResponse()
+                        .withStatus(500)
+                        .withBody("Review Service Not Available")));
+
+        webTestClient.get()
+                .uri("/v1/movies/{id}", "1")
+                .exchange()
+                .expectStatus()
+                .is5xxServerError()
+                .expectBody(String.class)
+                .isEqualTo("Server exception in ReviewsServiceReview Service Not Available");
+
+        WireMock.verify(4, getRequestedFor(urlPathMatching("/v1/reviews/*")));
     }
 }

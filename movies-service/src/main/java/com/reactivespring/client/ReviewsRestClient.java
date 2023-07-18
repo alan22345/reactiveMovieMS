@@ -4,6 +4,7 @@ import com.reactivespring.domain.Review;
 import com.reactivespring.exception.MoviesInfoClientException;
 import com.reactivespring.exception.ReviewsClientException;
 import com.reactivespring.exception.ReviewsServerException;
+import com.reactivespring.util.RetryUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -45,6 +46,7 @@ public class ReviewsRestClient {
                             .flatMap(responseMsg -> Mono.error(new ReviewsServerException(
                                     "Server exception in ReviewsService" + responseMsg)));
                 })
-                .bodyToFlux(Review.class);
+                .bodyToFlux(Review.class)
+                .retryWhen(RetryUtil.retrySpec());
     }
 }
